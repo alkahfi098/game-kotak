@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Klik Kotak - Login</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #e0f7fa, #ffffff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      color: #00796b;
+    }
+
+    #login-section, #game-section, #logout-confirm {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input {
+      padding: 8px;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #00796b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #004d40;
+    }
+
+    .error {
+      color: red;
+      font-size: 0.9rem;
+    }
+
+    #game-area {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      border: 2px solid #00796b;
+      border-radius: 10px;
+      background-color: #f1f8e9;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    #box {
+      width: 50px;
+      height: 50px;
+      background-color: #ff5722;
+      position: absolute;
+      border-radius: 8px;
+      cursor: pointer;
+      animation: pop 0.3s ease-in-out;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    #score, #time {
+      font-size: 1.2rem;
+      color: #004d40;
+    }
+
+    /* Konfirmasi logout */
+    #logout-confirm {
+      background: #fff;
+      border: 2px solid #d32f2f;
+      border-radius: 10px;
+      padding: 20px;
+      width: 300px;
+      color: #d32f2f;
+    }
+
+    #logout-confirm p {
+      margin-bottom: 15px;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    #logout-confirm button {
+      margin: 0 10px;
+      width: 80px;
+    }
+
+    #logout-confirm button.no {
+      background-color: #555;
+    }
+    #logout-confirm button.no:hover {
+      background-color: #333;
+    }
+
+    /* Copyright */
+    #copyright {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 20px;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+    selamat datang di game saya
+
+  <h1>🎮 Game Klik Kotak</h1>
+
+  <!-- Login Section -->
+  <div id="login-section">
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <div class="error" id="login-error"></div>
+    <div id="copyright">© 2025 Ahmad Alkahfi. All rights reserved.</div>
+  </div>
+
+  <!-- Game Section -->
+  <div id="game-section">
+    <div id="welcome">Selamat datang, <span id="user-name"></span>!</div>
+    <button onclick="startGame()">Mulai Game</button>
+    <div id="score">Skor: 0</div>
+    <div id="time">Waktu: 30</div>
+    <div id="game-area"></div>
+    <button onclick="showLogoutConfirm()" style="background-color: #d32f2f; margin-top: 10px;">Logout</button>
+  </div>
+
+  <!-- Konfirmasi Logout -->
+  <div id="logout-confirm">
+    <p>Apakah kamu yakin ingin logout?</p>
+    <div>
+      <button class="yes" onclick="doLogout()">Iya</button>
+      <button class="no" onclick="cancelLogout()">Tidak</button>
+    </div>
+  </div>
+
+  <script>
+    const loginSection = document.getElementById('login-section');
+    const gameSection = document.getElementById('game-section');
+    const logoutConfirm = document.getElementById('logout-confirm');
+
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginError = document.getElementById('login-error');
+    const userName = document.getElementById('user-name');
+    const gameArea = document.getElementById('game-area');
+    const scoreDisplay = document.getElementById('score');
+    const timeDisplay = document.getElementById('time');
+
+    let score = 0;
+    let timeLeft = 30;
+    let gameInterval, countdownInterval;
+
+    function showLogin() {
+      loginSection.style.display = 'flex';
+      gameSection.style.display = 'none';
+      logoutConfirm.style.display = 'none';
+      loginError.textContent = '';
+      usernameInput.value = '';
+      passwordInput.value = '';
+    }
+
+    function showGame() {
+      loginSection.style.display = 'none';
+      gameSection.style.display = 'flex';
+      logoutConfirm.style.display = 'none';
+      userName.textContent = localStorage.getItem('user');
+    }
+
+    function showLogoutConfirm() {
+      logoutConfirm.style.display = 'flex';
+      gameSection.style.display = 'none';
+    }
+
+    function cancelLogout() {
+      logoutConfirm.style.display = 'none';
+      gameSection.style.display = 'flex';
+    }
+
+    function login() {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (username === 'admin' && password === '12345') {
+        localStorage.setItem('loggedIn', 'true');
+        localStorage.setItem('user', username);
+        showGame();
+      } else {
+        loginError.textContent = 'Username atau password salah!';
+      }
+    }
+
+    function doLogout() {
+      localStorage.removeItem('loggedIn');
+      localStorage.removeItem('user');
+      clearInterval(gameInterval);
+      clearInterval(countdownInterval);
+      gameArea.innerHTML = '';
+      showLogin();
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = 30;
+      scoreDisplay.textContent = 'Skor: 0';
+      timeDisplay.textContent = 'Waktu: 30';
+      gameArea.innerHTML = '';
+
+      clearInterval(gameInterval);
+      clearInterval(countdownInterval);
+
+      spawnBox();
+
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        timeDisplay.textContent = `Waktu: ${timeLeft}`;
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          clearInterval(gameInterval);
+          gameArea.innerHTML = '';
+          alert('Waktu habis! Skor kamu: ' + score);
+        }
+      }, 1000);
+    }
+
+    function spawnBox() {
+      gameInterval = setInterval(() => {
+        gameArea.innerHTML = '';
+
+        const box = document.createElement('div');
+        box.id = 'box';
+
+        const x = Math.random() * (gameArea.clientWidth - 50);
+        const y = Math.random() * (gameArea.clientHeight - 50);
+        box.style.left = x + 'px';
+        box.style.top = y + 'px';
+
+        box.onclick = () => {
+          score++;
+          scoreDisplay.textContent = 'Skor: ' + score;
+          spawnBox(); // langsung ganti kotak
+        };
+
+        gameArea.appendChild(box);
+      }, 800);
+    }
+
+    window.onload = () => {
+      if (localStorage.getItem('loggedIn') === 'true') {
+        showGame();
+      } else {
+        showLogin();
+      }
+    };
+  </script>
+
+</body>
+</html>
